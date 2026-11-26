@@ -2,11 +2,9 @@ import type { Category, CategoryResponse } from "../../_types/category";
 import type { Product, ProductResponse } from "../../_types/product";
 import { getApiUrl } from "@/lib/api-url";
 
-const api = getApiUrl("v1");
-
 async function getData<T>(endpoint: string): Promise<T[]> {
   try {
-    const response = await fetch(`${api}/${endpoint}`,
+    const response = await fetch(getApiUrl(`v1/${endpoint}`),
        { next: { revalidate: 300 } });
       //  console.log("data",response);
        if (!response.ok) return [];
@@ -20,7 +18,7 @@ async function getData<T>(endpoint: string): Promise<T[]> {
 export const getProducts = () => getData<Product>("products?limit=40");
 export async function getAllProducts(): Promise<Product[]> {
   try {
-    const firstResponse = await fetch(`${api}/products?page=1&limit=40`, {
+    const firstResponse = await fetch(getApiUrl("v1/products?page=1&limit=40"), {
       next: { revalidate: 300 },
     });
     if (!firstResponse.ok) return [];
@@ -35,7 +33,7 @@ export async function getAllProducts(): Promise<Product[]> {
 
     const otherPages = await Promise.all(
       Array.from({ length: numberOfPages - 1 }, (_, index) => index + 2).map(async (page) => {
-        const response = await fetch(`${api}/products?page=${page}&limit=40`, {
+        const response = await fetch(getApiUrl(`v1/products?page=${page}&limit=40`), {
           next: { revalidate: 300 },
         });
         if (!response.ok) return [];

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Suspense } from "react";
 import { getProductById } from "./product.api";
 import { AddToCartButton } from "../../_components/Cart/add-to-cart-button";
 import { WishlistToggle } from "../../_components/Wishlist/wishlist-toggle";
@@ -7,7 +8,7 @@ type ProductPageProps = {
   params: Promise<{ id: string }>;
 };
 
-export default async function ProductPage(props: ProductPageProps) {
+async function ProductContent(props: ProductPageProps) {
   const params = await props.params;
   const product = await getProductById(params.id);
   const inStock = (product.ratingsQuantity ?? 0) > 0;
@@ -206,4 +207,8 @@ export default async function ProductPage(props: ProductPageProps) {
       </div>
     </main>
   );
+}
+
+export default function ProductPage(props: ProductPageProps) {
+  return <Suspense fallback={<div className="min-h-[55vh] animate-pulse bg-slate-50" />}><ProductContent params={props.params} /></Suspense>;
 }

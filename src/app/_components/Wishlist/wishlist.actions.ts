@@ -7,8 +7,6 @@ import { normalizeWishlistProducts } from "./wishlist.logic";
 
 type WishlistActionResult = { success: true; message: string } | { success: false; message: string };
 type WishlistToggleResult = WishlistActionResult & { saved?: boolean };
-const API = getApiUrl("v1/wishlist");
-
 async function getToken() {
   return (await getFreshCartSessionToken())?.backendToken;
 }
@@ -17,7 +15,7 @@ export async function getWishlistCount(): Promise<number> {
   const token = await getToken();
   if (!token) return 0;
   try {
-    const response = await fetch(API, { headers: { token }, cache: "no-store" });
+    const response = await fetch(getApiUrl("v1/wishlist"), { headers: { token }, cache: "no-store" });
     if (!response.ok) return 0;
     const result = (await response.json()) as { data?: { data?: unknown[] } | unknown[] };
     const payload = result.data;
@@ -47,7 +45,7 @@ export async function addProductToWishlist(productId: string): Promise<WishlistA
   if (!token) return { success: false, message: "Sign in to save items to your wishlist." };
 
   try {
-    const response = await fetch(API, {
+    const response = await fetch(getApiUrl("v1/wishlist"), {
       method: "POST",
       headers: { "Content-Type": "application/json", token },
       body: JSON.stringify({ productId }),
@@ -69,7 +67,7 @@ export async function removeProductFromWishlist(productId: string): Promise<Wish
   if (!token) return { success: false, message: "Sign in to manage your wishlist." };
 
   try {
-    const response = await fetch(`${API}/${encodeURIComponent(productId)}`, {
+    const response = await fetch(getApiUrl(`v1/wishlist/${encodeURIComponent(productId)}`), {
       method: "DELETE",
       headers: { token },
       cache: "no-store",
@@ -90,7 +88,7 @@ export async function toggleProductInWishlist(productId: string): Promise<Wishli
   if (!token) return { success: false, message: "Sign in to save items to your wishlist." };
 
   try {
-    const wishlistResponse = await fetch(API, { headers: { token }, cache: "no-store" });
+    const wishlistResponse = await fetch(getApiUrl("v1/wishlist"), { headers: { token }, cache: "no-store" });
     if (!wishlistResponse.ok) {
       return { success: false, message: "Could not load your wishlist. Please try again." };
     }
@@ -104,12 +102,12 @@ export async function toggleProductInWishlist(productId: string): Promise<Wishli
     const exists = normalizeWishlistProducts(items).some((product) => product._id === productId);
 
     const response = exists
-      ? await fetch(`${API}/${encodeURIComponent(productId)}`, {
+      ? await fetch(getApiUrl(`v1/wishlist/${encodeURIComponent(productId)}`), {
           method: "DELETE",
           headers: { token },
           cache: "no-store",
         })
-      : await fetch(API, {
+      : await fetch(getApiUrl("v1/wishlist"), {
           method: "POST",
           headers: { "Content-Type": "application/json", token },
           body: JSON.stringify({ productId }),

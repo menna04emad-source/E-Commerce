@@ -1,11 +1,9 @@
 import type { Category } from "../../_types/category";
 import { getApiUrl } from "@/lib/api-url";
 
-const API = getApiUrl("v1/categories");
-
 export async function getCategories(): Promise<Category[]> {
   try {
-    const response = await fetch(API, { next: { revalidate: 300 } });
+    const response = await fetch(getApiUrl("v1/categories"), { next: { revalidate: 300 } });
     if (!response.ok) return [];
     const result = (await response.json()) as { data?: Category[] };
     return Array.isArray(result.data) ? result.data : [];
@@ -16,7 +14,7 @@ export async function getCategories(): Promise<Category[]> {
 
 export async function getCategoryById(id: string): Promise<Category | null> {
   try {
-    const response = await fetch(`${API}/${encodeURIComponent(id)}`, {
+    const response = await fetch(getApiUrl(`v1/categories/${encodeURIComponent(id)}`), {
       next: { revalidate: 300 },
     });
     if (!response.ok) return null;

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { BrandDetail } from "../../_components/Brands/brand-detail";
 import { getBrandById } from "../../_components/Brands/brands.api";
 import { filterProductsByBrand } from "../../_components/Brands/brands.logic";
@@ -13,9 +14,13 @@ export async function generateMetadata({ params }: BrandPageProps): Promise<Meta
   return { title: brand ? `${brand.name} | FreshCart` : "Brand | FreshCart" };
 }
 
-export default async function BrandPage({ params }: BrandPageProps) {
+async function BrandContent({ params }: BrandPageProps) {
   const { id } = await params;
   const [brand, products] = await Promise.all([getBrandById(id), getAllProducts()]);
   if (!brand) notFound();
   return <BrandDetail brand={brand} products={filterProductsByBrand(products, brand._id)} />;
+}
+
+export default function BrandPage({ params }: BrandPageProps) {
+  return <Suspense fallback={<div className="min-h-[50vh] animate-pulse bg-slate-50" />}><BrandContent params={params} /></Suspense>;
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { VerifyResetCodeForm } from "../../_components/PasswordRecovery/verify-reset-code-form";
 import { PasswordRecoveryShell } from "../../_components/PasswordRecovery/password-recovery-shell";
 
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 
 type VerifyPageProps = { searchParams: Promise<{ email?: string | string[] }> };
 
-export default async function VerifyResetCodePage({ searchParams }: VerifyPageProps) {
+async function VerifyResetCodeContent({ searchParams }: VerifyPageProps) {
   const params = await searchParams;
   const email = Array.isArray(params.email) ? params.email[0] ?? "" : params.email ?? "";
 
@@ -21,5 +22,23 @@ export default async function VerifyResetCodePage({ searchParams }: VerifyPagePr
     >
       <VerifyResetCodeForm email={email} />
     </PasswordRecoveryShell>
+  );
+}
+
+export default function VerifyResetCodePage({ searchParams }: VerifyPageProps) {
+  return (
+    <Suspense
+      fallback={
+        <PasswordRecoveryShell
+          step={2}
+          title="Check Your Email"
+          description="Enter the 6-digit code sent to your email"
+        >
+          <div className="h-44 animate-pulse rounded-xl bg-slate-100" aria-label="Loading verification form" />
+        </PasswordRecoveryShell>
+      }
+    >
+      <VerifyResetCodeContent searchParams={searchParams} />
+    </Suspense>
   );
 }
